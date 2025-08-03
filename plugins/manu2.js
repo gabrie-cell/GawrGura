@@ -129,7 +129,7 @@ ${icono} *#infoanime*
 > ✦ Buscador de información de anime/manga.
 ${icono} *#hentaisearch • #searchhentai*
 > ✦ Buscador de capítulos hentai.
-${icono} #xnxxsearch • #xnxxs*
+${icono} *#xnxxsearch • #xnxxs*
 > ✦ Buscador de vídeos de Xnxx.
 ${icono} *#xvsearch • #xvideossearch*
 > ✦ Buscador de vídeos de Xvideos.
