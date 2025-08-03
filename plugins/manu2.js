@@ -1,3 +1,4 @@
+
 let handler = async (m, { conn, args }) => {
   let userId = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.sender
   let user = global.db.data.users[userId]
@@ -69,7 +70,6 @@ ${deco} 𝑯𝑨𝑻𝑺𝑼𝑵𝑬 𝑴𝑬𝑵𝑼 𝑼𝑳𝑻𝑹𝑨 ${dec
 
 • :･ﾟ⊹˚• \`『 Info-Bot 』\` •˚⊹:･ﾟ•
 
-❍ Comandos para ver estado e información de la Bot.
 ${icono} *#help • #menu*
 > ✦ Ver la lista de comandos de la Bot.
 ${icono} *#uptime • #runtime*
@@ -106,9 +106,9 @@ ${icono} *#ds • #fixmsgespera*
 > ✦ Eliminar archivos de sesión innecesarios.
 ${icono} *#editautoresponder*
 > ✦ Configurar un Prompt personalizado de la Bot.
-• :･ﾟ⊹˚• `『 Buscadores 』` •˚⊹:･ﾟ•
 
-❍ Comandos para realizar búsquedas en distintas plataformas.
+• :･ﾟ⊹˚• \`『 Buscadores 』\` •˚⊹:･ﾟ•
+
 ${icono} *#tiktoksearch • #tiktoks*
 > ✦ Buscador de videos de tiktok.
 ${icono} *#tweetposts*
@@ -138,16 +138,15 @@ ${icono} *#pornhubsearch • #phsearch*
 ${icono} *#npmjs*
 > ✦ Buscandor de npmjs.
 
-• :･ﾟ⊹˚• `『 Descargas 』` •˚⊹:･ﾟ•
+• :･ﾟ⊹˚• \`『 Descargas 』\` •˚⊹:･ﾟ•
 
-❍ Comandos de descargas para varios archivos.
 ${icono} *#tiktok • #tt*
 > ✦ Descarga videos de TikTok.
 ${icono} *#mediafire • #mf*
 > ✦ Descargar un archivo de MediaFire.
-${icono} *#pinvid • #pinvideo* + [enlacé]
+${icono} *#pinvid • #pinvideo* + [enlace]
 > ✦ Descargar vídeos de Pinterest. 
-${icono} *#mega • #mg* + [enlacé]
+${icono} *#mega • #mg* + [enlace]
 > ✦ Descargar un archivo de MEGA.
 ${icono} *#play • #play2*
 > ✦ Descarga música/video de YouTube.
@@ -178,9 +177,8 @@ ${icono} *#tiktokrandom • #ttrandom*
 ${icono} *#npmdl • #npmdownloader*
 > ✦ Descarga paquetes de NPMJs.
 
-• :･ﾟ⊹˚• `『 Economia 』` •˚⊹:･ﾟ•
+• :･ﾟ⊹˚• \`『 Economia 』\` •˚⊹:･ﾟ•
 
-❍ Comandos de economía y rpg para ganar dinero y otros recursos.
 ${icono} *#w • #work • #trabajar*
 > ✦ Trabaja para ganar ${moneda}.
 ${icono} *#slut • #protituirse*
@@ -237,9 +235,9 @@ ${icono} *#halloween*
 > ✦ Reclama tu dulce o truco (Solo en Halloween).
 ${icono} *#christmas • #navidad*
 > ✦ Reclama tu regalo navideño (Solo en Navidad).
-• :･ﾟ⊹˚• `『 Gacha 』` •˚⊹:･ﾟ•
 
-❍ Comandos de gacha para reclamar y colecciónar personajes.
+• :･ﾟ⊹˚• \`『 Gacha 』\` •˚⊹:･ﾟ•
+
 ${icono} *#rollwaifu • #rw • #roll*
 > ✦ Waifu o husbando aleatorio.
 ${icono} *#claim • #c • #reclamar*
@@ -257,9 +255,8 @@ ${icono} *#vote • #votar*
 ${icono} *#waifusboard • #waifustop • #topwaifus*
 > ✦ Ver el top de personajes con mayor valor.
 
-• :･ﾟ⊹˚• `『 Stickers 』` •˚⊹:･ﾟ•
+• :･ﾟ⊹˚• \`『 Stickers 』\` •˚⊹:･ﾟ•
 
-❍ Comandos para creaciones de stickers etc.
 ${icono} *#sticker • #s*
 > ✦ Crea stickers de (imagen/video)
 ${icono} *#setmeta*
@@ -279,9 +276,8 @@ ${icono} *#emojimix*
 ${icono} *#wm*
 > ✦ Cambia el nombre de los stickers.
 
-• :･ﾟ⊹˚• `『 Herramientas 』` •˚⊹:･ﾟ•
+• :･ﾟ⊹˚• \`『 Herramientas 』\` •˚⊹:･ﾟ•
 
-❍ Comandos de herramientas con muchas funciones.
 ${icono} *#calcular • #calcular • #cal*
 > ✦ Calcular todo tipo de ecuaciones.
 ${icono} *#tiempo • #clima*
@@ -309,9 +305,8 @@ ${icono} *#todoc • #toducument*
 ${icono} *#translate • #traducir • #trad*
 > ✦ Traduce palabras en otros idiomas.
 
-• :･ﾟ⊹˚• `『 Perfil 』` •˚⊹:･ﾟ•
+• :･ﾟ⊹˚• \`『 Perfil 』\` •˚⊹:･ﾟ•
 
-❍ Comandos de perfil para ver, configurar y comprobar estados de tu perfil.
 ${icono} *#reg • #verificar • #register*
 > ✦ Registra tu nombre y edad en el bot.
 ${icono} *#unreg*
@@ -343,9 +338,8 @@ ${icono} *#comprarpremium • #premium*
 ${icono} *#confesiones • #confesar*
 > ✦ Confiesa tus sentimientos a alguien de manera anonima.
 
-• :･ﾟ⊹˚• `『 Grupos 』` •˚⊹:･ﾟ•
+• :･ﾟ⊹˚• \`『 Grupos 』\` •˚⊹:･ﾟ•
 
-❍ Comandos de grupos para una mejor gestión de ellos.
 ${icono} *#hidetag*
 > ✦ Envia un mensaje mencionando a todos los usuarios
 ${icono} *#gp • #infogrupo*
@@ -358,7 +352,7 @@ ${icono} *#setbye*
 > ✦ Establecer un mensaje de despedida personalizado.
 ${icono} *#link*
 > ✦ El bot envia el link del grupo.
-${icono} *admins • admin*
+${icono} *#admins • #admin*
 > ✦ Mencionar a los admins para solicitar ayuda.
 ${icono} *#restablecer • #revoke*
 > ✦ Restablecer el enlace del grupo.
@@ -408,9 +402,9 @@ ${icono} *#setemoji • #setemo*
 > ✦ Cambia el emoji que se usa en la invitación de usuarios.
 ${icono} *#listnum • #kicknum*
 > ✦ Elimine a usuario por el prefijo de país.
-• :･ﾟ⊹˚• `『 Anime 』` •˚⊹:･ﾟ•
 
-❍ Comandos de reacciones de anime.
+• :･ﾟ⊹˚• \`『 Anime 』\` •˚⊹:･ﾟ•
+
 ${icono} *#angry • #enojado* + <mencion>
 > ✦ Estar enojado
 ${icono} *#bite* + <mencion>
@@ -480,9 +474,8 @@ ${icono} *#smoke* + <mencion>
 ${icono} *#think* + <mencion>
 > ✦ Pensar en algo
 
-• :･ﾟ⊹˚• `『 NSFW 』` •˚⊹:･ﾟ•
+• :･ﾟ⊹˚• \`『 NSFW 』\` •˚⊹:･ﾟ•
 
-❍ Comandos NSFW (Contenido para adultos)
 ${icono} *#anal* + <mencion>
 > ✦ Hacer un anal
 ${icono} *#waifu*
@@ -526,9 +519,8 @@ ${icono} *#undress • #encuerar* + <mencion>
 ${icono} *#yuri • #tijeras* + <mencion>
 > ✦ Hacer tijeras.
 
-• :･ﾟ⊹˚• `『 Juegos 』` •˚⊹:･ﾟ•
+• :･ﾟ⊹˚• \`『 Juegos 』\` •˚⊹:･ﾟ•
 
-❍ Comandos de juegos para jugar con tus amigos.
 ${icono} *#amistad • #amigorandom* 
 > ✦ Hacer amigos con un juego. 
 ${icono} *#chaqueta • #jalamela*
@@ -597,7 +589,7 @@ ${icono} *#ttt*
 ${bordeSel.bottom}
 `.trim()
 
-await conn.sendMessage(m.chat, {
+  await conn.sendMessage(m.chat, {
     video: { url: 'https://cdn.russellxz.click/72b0b493.mp4' },
     gifPlayback: true,
     caption: txt,
