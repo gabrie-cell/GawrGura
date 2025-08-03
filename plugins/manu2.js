@@ -6,6 +6,9 @@ let handler = async (m, { conn, args }) => {
   let uptime = clockString(_uptime)
   let totalreg = Object.keys(global.db.data.users).length
   let totalCommands = Object.values(global.plugins).filter((v) => v.help && v.tags).length
+  let botname = global.namebot || 'Bot'
+  let moneda = global.moneda || 'Coins'
+  let channelRD = { id: 'channel', name: 'Channel' }
 
   // 20 Decoraciones
   let decoraciones = [
@@ -614,7 +617,7 @@ await conn.sendMessage(m.chat, {
 
 handler.help = ['menu2']
 handler.tags = ['main']
-handler.command = ['menu2', 'menú2', 'help']
+handler.command = ['menu2', 'menú2']
 
 export default handler
 
