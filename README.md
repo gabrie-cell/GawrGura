@@ -47,7 +47,6 @@
 ## ⚙️ Instalación (Replit / Termux / Boxmine)
 
 1. Clona el repositorio  
-```bash
 git clone https://github.com/Andresv27728/GawrGura.git
 cd GawrGura
 Instala dependencias
