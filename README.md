@@ -6,7 +6,7 @@
 <img src="https://i.imgur.com/VYBYeUJ.gif" alt="Gawr Gura" width="300"/>
 
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg?style=for-the-badge&logo=node.js)](https://nodejs.org/)
-[![WhatsApp](https://img.shields.io/badge/WhatsApp-Bot-green.svg?style=for-the-badge&logo=whatsapp)](https://whatsapp.com/)
+[![WhatsApp](https://img.shields.io/badge/WhatsApp-Bot-green.svg?style=for-the-badge&logo=whatsapp)](https://whatsapp.com/573133374132)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow.svg?style=for-the-badge&logo=javascript)](https://javascript.info/)
 [![Replit](https://img.shields.io/badge/Replit-Ready-orange.svg?style=for-the-badge&logo=replit)](https://replit.com/)
 
@@ -202,7 +202,7 @@ global.prefix = ['.', '/', '#', '!']
 5. Abre un Pull Request
 
 ### 🐛 **Reportar Bugs**
-- Usa las [Issues](https://github.com/tu-repo/issues) de GitHub
+- Usa las [Issues](/github.com/Andresv27728/GawrGura/issues) de GitHub
 - Incluye pasos para reproducir el error
 - Menciona tu versión de Node.js y sistema operativo
 
@@ -212,17 +212,10 @@ global.prefix = ['.', '/', '#', '!']
 
 ## 📊 Estadísticas del Proyecto
 
-![Languages](https://img.shields.io/github/languages/top/tu-usuario/tu-repo?style=for-the-badge)
-![Size](https://img.shields.io/github/repo-size/tu-usuario/tu-repo?style=for-the-badge)
-![Issues](https://img.shields.io/github/issues/tu-usuario/tu-repo?style=for-the-badge)
-![License](https://img.shields.io/github/license/tu-usuario/tu-repo?style=for-the-badge)
-
-## 💝 Donaciones
-
-Si este proyecto te fue útil, considera apoyar el desarrollo:
-
-[![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/tu-paypal)
-[![Ko-fi](https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/tu-kofi)
+![Languages](https://img.shields.io/github/languages/top/Andresv27728/GawrGura?style=for-the-badge)
+![Size](https://img.shields.io/github/GawrGura-size/Andresv27728/GawrGura?style=for-the-badge)
+![Issues](https://img.shields.io/github/issues/Andresv27728/GawrGura?style=for-the-badge)
+![License](https://img.shields.io/github/license/Andresv27728/GawrGura?style=for-the-badge)
 
 ## 📄 Licencia
 
