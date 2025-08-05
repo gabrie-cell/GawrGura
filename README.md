@@ -1,245 +1,158 @@
-
 <div align="center">
 
-# 🦈 Gawr Gura WhatsApp Bot 🌊
+# 🦈 Gawr Gura WhatsApp Bot 🌊  
+### ✨ Por: Yo Soy Yo
 
 <img src="https://i.imgur.com/VYBYeUJ.gif" alt="Gawr Gura" width="300"/>
 
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg?style=for-the-badge&logo=node.js)](https://nodejs.org/)
-[![WhatsApp](https://img.shields.io/badge/WhatsApp-Bot-green.svg?style=for-the-badge&logo=whatsapp)](https://whatsapp.com/573133374132)
+[![WhatsApp](https://img.shields.io/badge/WhatsApp-Bot-green.svg?style=for-the-badge&logo=whatsapp)](https://wa.me/573133374132)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow.svg?style=for-the-badge&logo=javascript)](https://javascript.info/)
 [![Replit](https://img.shields.io/badge/Replit-Ready-orange.svg?style=for-the-badge&logo=replit)](https://replit.com/)
 
-*Un bot de WhatsApp kawaii inspirado en Gawr Gura de Hololive 🦈*
+> *Un bot de WhatsApp kawaii inspirado en Gawr Gura de Hololive, con plugins, comandos básicos, multimedia y más*
 
 ---
 
-## ✨ Características Principales
-
-</div>
-
-### 🎮 **Juegos y Entretenimiento**
-- 🎲 **Dados virtuales** - Lanza dados con stickers kawaii
-- 🎰 **Ruleta diaria** - Gana premios únicos (2% de probabilidad)
-- 🏆 **Rankings dinámicos** - TOP 10 de cualquier tema
-- 🌸 **Waifus aleatorias** - Imágenes anime de alta calidad
-
-### 👥 **Gestión de Grupos**
-- 🔒 **Control de grupo** - Abrir/cerrar grupos con temporizador
-- 👋 **Bienvenidas temporales** - Mensajes personalizables por 1 minuto
-- 📋 **Sistema de fichas** - Presentaciones personalizadas
-- 🏷️ **Menciones masivas** - Invocar a todos los miembros
-- ⚡ **Administración avanzada** - Kick, promote, demote y más
-
-### 🛠️ **Herramientas Útiles**
-- 📱 **Descargas multimedia** - YouTube, TikTok, Instagram
-- 🖼️ **Procesamiento de imágenes** - HD, stickers, conversiones
-- 🔍 **Búsquedas inteligentes** - Pinterest, imágenes, música
-- 🌐 **Traductor automático** - Múltiples idiomas
-- 📊 **Información de grupos** - Inspección detallada
-
-### 🤖 **Inteligencia Artificial**
-- 🎨 **DALL-E Integration** - Generación de imágenes IA
-- 💬 **Chat inteligente** - Respuestas contextuales
-- 🔊 **Text-to-Speech** - Convierte texto a audio
+<img src="https://i.imgur.com/hVvX4ZZ.png" width="320" alt="Gawr Gura Presentación"/>
 
 ---
 
-<div align="center">
+## 🧷 Información del Servidor
 
-## 🚀 Instalación Rápida en Replit
+<img src="https://i.imgur.com/xMD06Hg.png" width="200"/>
 
-</div>
+**🌐 Repositorio Oficial:**  
+[🔗 GitHub - Andresv27728/GawrGura](https://github.com/Andresv27728/GawrGura.git)
 
-### 📋 **Prerrequisitos**
-- Cuenta de [Replit](https://replit.com/)
-- Número de WhatsApp para el bot
-- Conexión a internet estable
+**📱 Contacto Único y Oficial:**  
+[🌐 WhatsApp](https://wa.me/573133374132) → **+573133374132**
 
-### 🔧 **Pasos de Instalación**
-
-1. **Crear un nuevo Repl**
-   ```bash
-   # En Replit, crea un nuevo proyecto Node.js
-   # Importa este repositorio o sube los archivos
-   ```
-
-2. **Configurar variables de entorno**
-   - Ve a la pestaña **Secrets** en Replit
-   - Agrega las siguientes variables:
-   ```
-   PREFIX = .
-   OWNER_NUMBER = 1234567890
-   BOT_NAME = Gawr Gura Bot
-   ```
-
-3. **Instalar dependencias**
-   ```bash
-   npm install
-   ```
-
-4. **Configurar el bot**
-   ```javascript
-   // Edita config.js con tus datos
-   global.owner = [['1234567890', 'Tu Nombre', true]]
-   global.botname = 'Gawr Gura Bot'
-   ```
-
-5. **Ejecutar el bot**
-   ```bash
-   npm start
-   ```
-
-6. **Escanear código QR**
-   - Se generará un código QR en la consola
-   - Escanéalo con WhatsApp Web
-   - ¡El bot estará listo! 🎉
+> ⚠️ No existen otros canales de contacto ni redes sociales.
 
 ---
 
-<div align="center">
+## ✨ Características Destacadas
 
-## 📚 Comandos Principales
+<img src="https://i.imgur.com/ADvvBFk.png" width="280"/>
 
-</div>
-
-### 🎮 **Entretenimiento**
-| Comando | Descripción | Ejemplo |
-|---------|-------------|---------|
-| `.dado` | Lanza un dado virtual | `.dado` |
-| `.ruleta` | Gira la ruleta (1 vez/día) | `.ruleta` |
-| `.top` | Crea rankings divertidos | `.top guapos` |
-| `.rw` | Waifu aleatoria | `.rw` |
-
-### 👥 **Administración**
-| Comando | Descripción | Ejemplo |
-|---------|-------------|---------|
-| `.cerrar` | Cierra el grupo | `.cerrar` |
-| `.abrir` | Abre el grupo | `.abrir` |
-| `.cerrartemp` | Cierra por tiempo limitado | `.cerrartemp 5m` |
-| `.kick` | Expulsa miembros | `.kick @usuario` |
-| `.promote` | Da admin | `.promote @usuario` |
-
-### 📋 **Utilidades**
-| Comando | Descripción | Ejemplo |
-|---------|-------------|---------|
-| `.ficha` | Carta de presentación | `.ficha Hola soy Gura` |
-| `.bienvenida` | Activa bienvenidas (1min) | `.bienvenida ¡Hola!` |
-| `.invocar` | Menciona a todos | `.invocar Reunión` |
-| `.play` | Descarga música | `.play nombre canción` |
-
-### 🛠️ **Herramientas**
-| Comando | Descripción | Ejemplo |
-|---------|-------------|---------|
-| `.sticker` | Crea stickers | `.sticker` (con imagen) |
-| `.hd` | Mejora calidad de imagen | `.hd` (con imagen) |
-| `.translate` | Traduce texto | `.translate es hello` |
-| `.ss` | Captura de pantalla web | `.ss google.com` |
+✅ Comandos básicos y útiles  
+🧩 Sistema modular por plugins  
+📲 Compatible con Termux / Replit / Boxmine  
+💬 Interfaz fácil de usar  
+🛠️ Control desde consola
 
 ---
 
-<div align="center">
+## ⚙️ Instalación (Replit / Termux / Boxmine)
 
-## ⚙️ Configuración Avanzada
+1. Clona el repositorio  
+```bash
+git clone https://github.com/Andresv27728/GawrGura.git
+cd GawrGura
+Instala dependencias
 
-</div>
+bash
+Copiar
+Editar
+npm install
+Configura settings.js con tu información
 
-### 🔐 **Variables de Entorno (Secrets)**
-```env
-# Bot Configuration
-PREFIX=.
-OWNER_NUMBER=1234567890
+js
+Copiar
+Editar
+global.owner = ['573133374132']
+global.botname = 'Gawr Gura Bot'
+global.channel = 'https://wa.me/573133374132'
+Ejecuta el bot
+
+bash
+Copiar
+Editar
+npm start
+🗂️ Estructura del Proyecto
+bash
+Copiar
+Editar
+├── plugins/             # Comandos en forma de plugins
+├── lib/                 # Librerías base del bot
+├── database/            # Datos temporales
+├── settings.js          # Configuración principal
+├── main.js              # Código principal del bot
+└── README.md            # Este documento
+🧠 Comandos Destacados
+<img src="https://i.imgur.com/q93CrYj.png" width="240"/>
+🎮 Juegos
+.ruleta — Gira la ruleta
+
+.dado — Lanza un dado
+
+.top memes — Ranking personalizado
+
+👥 Grupo
+.kick — Expulsar usuarios
+
+.promote / .demote — Administrar
+
+.antilink — Anti-enlaces
+
+.bienvenida — Mensaje de bienvenida
+
+📥 Multimedia
+.play — Descarga de audio
+
+.ytmp3 — YouTube MP3
+
+.tiktok — Video TikTok
+
+.ss — Captura de página web
+
+💬 Herramientas
+.sticker — Crear stickers
+
+.translate — Traductor
+
+.infobot — Info del bot
+
+.ping — Estado del bot
+
+🔁 Actualización del Bot
+bash
+Copiar
+Editar
+.update
+Solo el owner puede usar este comando.
+Sincroniza plugins desde GitHub automáticamente.
+
+⚙️ Variables Recomendadas
+env
+Copiar
+Editar
+OWNER_NUMBER=573133374132
 BOT_NAME=Gawr Gura Bot
+PREFIX=.
+💬 Consola del Bot
+Visualiza mensajes en tiempo real:
 
-# API Keys (Opcional)
-OPENAI_KEY=your_openai_key
-DEEPAI_KEY=your_deepai_key
+csharp
+Copiar
+Editar
+[MESSAGE] +573133374132: .play Música Anime
+[INFO] Ejecutando comando: .infobot
+[ADMIN] Grupo cerrado correctamente.
+🤝 ¿Quieres Contribuir?
+Haz fork al repo
 
-# Database (Opcional)
-MONGODB_URI=your_mongodb_uri
-```
+Crea una rama (feature/nombre)
 
-### 📁 **Estructura del Proyecto**
-```
-├── 📂 plugins/          # Comandos del bot
-│   ├── 🎮 game-*.js     # Juegos
-│   ├── 👥 grupo-*.js    # Gestión de grupos
-│   ├── 🛠️ tools-*.js    # Herramientas
-│   └── 📱 downloader-*.js # Descargas
-├── 📂 lib/              # Librerías principales
-├── 📂 database/         # Base de datos local
-├── 📂 storage/          # Archivos temporales
-├── ⚙️ config.js         # Configuración principal
-├── 🚀 main.js           # Archivo principal
-└── 📦 package.json      # Dependencias
-```
+Push y Pull Request
 
-### 🔧 **Personalización**
-```javascript
-// En config.js - Personaliza mensajes
-global.wm = 'Gawr Gura Bot 🦈'
-global.footer = 'Powered by Atlantis'
-global.packname = 'Gura Stickers'
-global.author = '@Gawr_Gura'
+📜 Licencia
+MIT © Yo Soy Yo
 
-// Cambiar prefijos
-global.prefix = ['.', '/', '#', '!']
-```
+<div align="center"> <img src="https://i.imgur.com/9mLOQEX.gif" width="180"/>
+Gracias por usar Gawr Gura Bot 💙
+"A~" - Gura, probablemente.
 
----
-
-<div align="center">
-
-## 🤝 Contribución
-
-</div>
-
-### 📝 **Cómo Contribuir**
-1. Fork el repositorio
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
-### 🐛 **Reportar Bugs**
-- Usa las [Issues](/github.com/Andresv27728/GawrGura/issues) de GitHub
-- Incluye pasos para reproducir el error
-- Menciona tu versión de Node.js y sistema operativo
-
----
-
-<div align="center">
-
-## 📊 Estadísticas del Proyecto
-
-![Languages](https://img.shields.io/github/languages/top/Andresv27728/GawrGura?style=for-the-badge)
-![Size](https://img.shields.io/github/GawrGura-size/Andresv27728/GawrGura?style=for-the-badge)
-![Issues](https://img.shields.io/github/issues/Andresv27728/GawrGura?style=for-the-badge)
-![License](https://img.shields.io/github/license/Andresv27728/GawrGura?style=for-the-badge)
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT - mira el archivo [LICENSE](LICENSE) para más detalles.
-
----
-
-### 🦈 Hecho por Yo Soy Yo
-
-<img src="https://i.imgur.com/rKVlUIL.gif" alt="Gawr Gura Wave" width="200"/>
-
-*"A~" - Gawr Gura, probably*
-
-</div>
-
----
-
-<div align="center">
-
-### 🔗 Enlaces Útiles
-
-[📖 Documentación](docs/) • [🐛 Reportar Bug](issues/) • [💬 Discord](https://discord.gg) • [📱 Telegram](https://t.me)
-
-**⭐ Si te gustó el proyecto, dale una estrella en GitHub!**
-
-</div>
+</div> ```
 has un bot de whatsapp en javascript y nodejs usando brailes para vincularse que se use un sistema de plugins los cuales serán los comandos además que se pueda subir todo a github la instalarla en servidores como boxmine o termux o otras plataformas demás pon todas las instrrucciones de uso en el readme además pon 100 comandos variados pon coamndos de administracion de grupos descarga las cuales usaran apis publicas y gratuitas comandos de juegos y muchos mas además en el setings se defina el numero del owner el cuale es el dueño del bot también el nombre del bot y el canal del bot además que tenga un sistema de subbots unos públicos los cuales solo tendrán comandos mínimos y básicos como 2 de descarga muy pocos de administración de grupos menos juegos y eso y para ser premium el owner se lo tiene que otorgar con un comando que sea algo como esto vip numero de telefono y el tiempo que será vip además que se envie una notificación al faltar 1 día sin ser vip que use brailes para la coneccion y que hagas un colado que sea update y este en los 2 auque solo lo pueda usar el owner los comandos de administración de grupo que solo se puedan usar en los grupos crea comandos de ping infobot estado y todo lo necesario adelas que en la consola se vean los mensajes del bot crea opciones de activar o descativar comandos como las bienvenidas o el antilink además que los comandos de leo bots free y los de los bots premium estén en carpetas totalmente separados inspírate en gatabot
