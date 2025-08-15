@@ -1,77 +1,98 @@
 import fetch from 'node-fetch';
-import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-let handler = async (m, { conn, text }) => {
-  if (!text) return m.reply('📀 Ingresa la URL de la playlist de YouTube');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-  const tempDir = './temp_playlist';
-  if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
+// APIs públicas sin Key
+const apis = [
+  // Delirius
+  async (videoUrl) => {
+    const res = await fetch(`https://delirius-apiofc.vercel.app/download/ytmp3?url=${encodeURIComponent(videoUrl)}`);
+    const data = await res.json();
+    if (data?.status && data?.data?.download?.url) {
+      return { title: data.data.title, url: data.data.download.url };
+    }
+    return null;
+  },
+  // SaveTube
+  async (videoUrl) => {
+    const res = await fetch(`https://yt-api.org/api/mp3?url=${encodeURIComponent(videoUrl)}`);
+    const data = await res.json();
+    if (data?.success && data?.link) {
+      return { title: data.title, url: data.link };
+    }
+    return null;
+  }
+];
 
-  m.reply('🔍 Obteniendo lista de videos...');
+// Descargar mp3 en disco temporal
+async function descargarMp3(url, nombreArchivo) {
+  const res = await fetch(url);
+  const buffer = await res.arrayBuffer();
+  fs.writeFileSync(nombreArchivo, Buffer.from(buffer));
+}
 
-  // Obtener títulos y URLs de la playlist con yt-dlp (modo rápido)
-  const list = spawn('yt-dlp', ['--flat-playlist', '--print', 'title', '--print', 'url', text]);
+// Comando para procesar playlist
+export async function comandoPlaylist(sock, chatId, playlistUrl) {
+  try {
+    // Obtener lista de videos desde API pública
+    const playlistRes = await fetch(`https://yt-api.org/api/playlist?url=${encodeURIComponent(playlistUrl)}`);
+    const playlistData = await playlistRes.json();
 
-  let output = '';
-  list.stdout.on('data', data => { output += data.toString(); });
+    if (!playlistData?.videos?.length) {
+      await sock.sendMessage(chatId, { text: '⚠️ No se encontraron videos en la playlist.' });
+      return;
+    }
 
-  list.on('close', async () => {
-    let lines = output.trim().split('\n');
+    await sock.sendMessage(chatId, { text: `🎵 Encontrados ${playlistData.videos.length} videos. Enviando...` });
 
-    for (let i = 0; i < lines.length; i += 2) {
-      let title = lines[i];
-      let url = lines[i + 1];
-      m.reply(`🎵 Descargando: ${title}`);
+    for (const video of playlistData.videos) {
+      let mp3Info = null;
 
-      let filePath = path.join(tempDir, `${title.replace(/[\/\\?%*:|"<>]/g, '_')}.mp3`);
-
-      // Primero intentar con la API Delirius
-      let downloaded = false;
-      try {
-        let apiUrl = `https://delirius-apiofc.vercel.app/download/ytmp3?url=${url}`;
-        let res = await fetch(apiUrl);
-        let json = await res.json();
-
-        if (json.status && json.download?.url) {
-          let audioRes = await fetch(json.download.url);
-          let buffer = await audioRes.arrayBuffer();
-          fs.writeFileSync(filePath, Buffer.from(buffer));
-          downloaded = true;
+      // Probar cada API hasta que funcione
+      for (const api of apis) {
+        try {
+          mp3Info = await api(video.url);
+          if (mp3Info) break;
+        } catch {
+          // Si falla, pasa a la siguiente
         }
-      } catch (e) {
-        console.error(`❌ API Delirius falló para ${title}`, e);
       }
 
-      // Si la API falla, usar yt-dlp local
-      if (!downloaded) {
-        await new Promise((resolve, reject) => {
-          const dl = spawn('yt-dlp', [
-            '-x', '--audio-format', 'mp3', '-o', filePath, url
-          ]);
+      if (!mp3Info) {
+        await sock.sendMessage(chatId, { text: `❌ No pude descargar: ${video.title}` });
+        continue;
+      }
 
-          dl.on('close', resolve);
-          dl.on('error', reject);
+      const filePath = path.join(__dirname, `${mp3Info.title}.mp3`);
+      await descargarMp3(mp3Info.url, filePath);
+
+      const stats = fs.statSync(filePath);
+      const isHeavy = stats.size > 8 * 1024 * 1024;
+
+      // Enviar audio o documento dependiendo del tamaño
+      if (isHeavy) {
+        await sock.sendMessage(chatId, {
+          document: { url: filePath },
+          mimetype: 'audio/mpeg',
+          fileName: `${mp3Info.title}.mp3`
+        });
+      } else {
+        await sock.sendMessage(chatId, {
+          audio: { url: filePath },
+          mimetype: 'audio/mpeg'
         });
       }
 
-      // Enviar audio
-      try {
-        await conn.sendMessage(m.chat, {
-          audio: fs.readFileSync(filePath),
-          mimetype: 'audio/mpeg',
-          fileName: `${title}.mp3`
-        }, { quoted: m });
-        fs.unlinkSync(filePath);
-      } catch (e) {
-        console.error(e);
-      }
+      fs.unlinkSync(filePath); // eliminar archivo temporal
     }
 
-    m.reply('✅ Playlist enviada completa');
-  });
-};
-
-handler.command = ['playlist'];
-export default handler;
+    await sock.sendMessage(chatId, { text: '✅ Playlist completa enviada.' });
+  } catch (err) {
+    console.error(err);
+    await sock.sendMessage(chatId, { text: '❌ Error al procesar la playlist.' });
+  }
+}
