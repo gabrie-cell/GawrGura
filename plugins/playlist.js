@@ -1,18 +1,19 @@
+// playlist.js
 const fetch = require('node-fetch');
 const fs = require('fs');
 const path = require('path');
 const archiver = require('archiver');
 
-let handler = async (m, { conn, args, usedPrefix, command }) => {
-    if (!args[0]) return m.reply(`🎵 Ingresa el enlace de una playlist de YouTube.\n\nEjemplo:\n${usedPrefix + command} https://youtube.com/playlist?list=PL123456`);
+let handler = async (m, { conn, args, text, usedPrefix, command }) => {
+    let url = args[0] || text.trim();
+    if (!url) return m.reply(`🎵 Ingresa el enlace de una playlist de YouTube.\n\nEjemplo:\n${usedPrefix + command} https://youtube.com/playlist?list=PLxxxx`);
 
-    let url = args[0];
     if (!url.includes('playlist?list=')) return m.reply('❌ El enlace no es una playlist válida de YouTube.');
 
     await m.reply('⏳ Obteniendo lista de canciones desde API...');
 
     try {
-        // API para obtener playlist
+        // Obtener info de playlist (API gratuita de lolhuman)
         let res = await fetch(`https://api.lolhuman.xyz/api/ytplaylist?apikey=GATA_DIOS&url=${encodeURIComponent(url)}`);
         let json = await res.json();
 
@@ -34,14 +35,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             let buffer = await audioRes.buffer();
             fs.writeFileSync(filePath, buffer);
 
-            archivos.push({
-                path: filePath,
-                title: vid.title
-            });
+            archivos.push({ path: filePath, title: vid.title });
         }
 
         if (total > 20) {
-            // Comprimir a ZIP
             let zipPath = path.join(__dirname, `playlist_${Date.now()}.zip`);
             let outputZip = fs.createWriteStream(zipPath);
             let archive = archiver('zip', { zlib: { level: 9 } });
@@ -85,7 +82,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     }
 };
 
-handler.command = /^playlist$/i;
+// 🔹 Detecta con o sin prefijo
+handler.customPrefix = /^(playlist|pl)$/i;
+handler.command = new RegExp;
 handler.help = ['playlist <url>'];
 handler.tags = ['descargas'];
 
