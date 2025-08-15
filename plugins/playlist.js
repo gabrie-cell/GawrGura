@@ -1,93 +1,64 @@
-// playlist.js
-import fetch from 'node-fetch';
-import fs from 'fs';
-import path from 'path';
-import archiver from 'archiver';
-import { fileURLToPath } from 'url';
+import fetch from 'node-fetch'
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+let handler = async (m, { conn, usedPrefix, command, text }) => {
+  if (!text) return m.reply(`🦈 *¡Eh buba~! Ingresa una playlist de YouTube desu~*\n🌊 *Ejemplo:* ${usedPrefix + command} https://youtube.com/playlist?list=PL...`)
 
-let handler = async (m, { conn, args, text, usedPrefix, command }) => {
-    let url = args[0] || text.trim();
-    if (!url) return m.reply(`🎵 Ingresa el enlace de una playlist de YouTube.\n\nEjemplo:\n${usedPrefix + command} https://youtube.com/playlist?list=PLxxxx`);
+  try {
+    // 1️⃣ Obtener info de la playlist
+    let playlistRes = await fetch(`https://delirius-apiofc.vercel.app/ytplaylist?url=${encodeURIComponent(text)}`)
+    let playlist = await playlistRes.json()
 
-    if (!url.includes('playlist?list=')) return m.reply('❌ El enlace no es una playlist válida de YouTube.');
+    if (!playlist.data || !playlist.data.length) return m.reply('❌ *Awww~ No encontré esa playlist buba~.*')
 
-    await m.reply('⏳ Obteniendo lista de canciones desde API...');
+    m.reply(`📀 *Encontré ${playlist.data.length} canciones en la playlist*\n🦈 Espera mientras las descargo todas...`)
 
-    try {
-        // API gratuita
-        let res = await fetch(`https://api.lolhuman.xyz/api/ytplaylist?apikey=GATA_DIOS&url=${encodeURIComponent(url)}`);
-        let json = await res.json();
+    let audios = []
+    for (let video of playlist.data) {
+      let audioUrl = null
+      const apis = [
+        `https://theadonix-api.vercel.app/api/ytmp3?url=${encodeURIComponent(video.url)}`,
+        `https://api.ytjar.download/audio?url=${encodeURIComponent(video.url)}`
+      ]
 
-        if (!json.result?.video?.length) {
-            return m.reply('❌ No se pudo obtener la playlist.');
-        }
+      for (const api of apis) {
+        try {
+          const res = await fetch(api)
+          const json = await res.json()
+          if (json?.result?.audio) {
+            audioUrl = json.result.audio
+            break
+          } else if (json?.url) {
+            audioUrl = json.url
+            break
+          }
+        } catch {}
+      }
 
-        let total = json.result.video.length;
-        await m.reply(`📀 *Playlist:* ${json.result.title}\n🎶 *Total canciones:* ${total}\n\n▶️ Descargando...`);
-
-        let archivos = [];
-
-        for (let i = 0; i < total; i++) {
-            let vid = json.result.video[i];
-            let audioUrl = `https://api.lolhuman.xyz/api/ytaudio2?apikey=GATA_DIOS&url=${encodeURIComponent(vid.url)}`;
-            let filePath = path.join(__dirname, `temp_${Date.now()}_${i}.mp3`);
-
-            let audioRes = await fetch(audioUrl);
-            let buffer = await audioRes.buffer();
-            fs.writeFileSync(filePath, buffer);
-
-            archivos.push({ path: filePath, title: vid.title });
-        }
-
-        if (total > 20) {
-            let zipPath = path.join(__dirname, `playlist_${Date.now()}.zip`);
-            let outputZip = fs.createWriteStream(zipPath);
-            let archive = archiver('zip', { zlib: { level: 9 } });
-
-            archive.pipe(outputZip);
-            archivos.forEach(({ path: filePath, title }) => {
-                archive.file(filePath, { name: `${title}.mp3` });
-            });
-            await archive.finalize();
-
-            outputZip.on('close', async () => {
-                await conn.sendMessage(m.chat, {
-                    document: fs.readFileSync(zipPath),
-                    mimetype: 'application/zip',
-                    fileName: `${json.result.title}.zip`
-                }, { quoted: m });
-
-                archivos.forEach(a => fs.unlinkSync(a.path));
-                fs.unlinkSync(zipPath);
-
-                await m.reply('🎉 Playlist enviada completa en ZIP.');
-            });
-
-        } else {
-            for (let { path: filePath, title } of archivos) {
-                await conn.sendMessage(m.chat, {
-                    audio: fs.readFileSync(filePath),
-                    mimetype: 'audio/mpeg',
-                    fileName: `${title}.mp3`
-                }, { quoted: m });
-                fs.unlinkSync(filePath);
-            }
-            await m.reply('🎉 Playlist enviada completa.');
-        }
-
-    } catch (e) {
-        console.error(e);
-        m.reply('❌ Error al procesar la playlist.');
+      if (audioUrl) {
+        audios.push({ title: video.title, url: audioUrl })
+      }
     }
-};
 
-// Detecta con o sin prefijo
-handler.customPrefix = /^(playlist|pl)$/i;
-handler.command = new RegExp;
-handler.help = ['playlist <url>'];
-handler.tags = ['descargas'];
+    // 2️⃣ Enviar resultados
+    if (audios.length > 20) {
+      let lista = audios.map((a, i) => `${i + 1}. ${a.title}\n${a.url}`).join('\n\n')
+      await conn.sendMessage(m.chat, { text: `📦 *Demasiados audios buba~*\nAquí tienes los links:\n\n${lista}` }, { quoted: m })
+    } else {
+      for (let audio of audios) {
+        await conn.sendMessage(m.chat, {
+          audio: { url: audio.url },
+          mimetype: 'audio/mpeg',
+          fileName: `${audio.title}.mp3`,
+          ptt: true
+        }, { quoted: m })
+      }
+    }
 
-export default handler;
+  } catch (e) {
+    console.error(e)
+    m.reply(`❌ *Gyaa~ Algo salió mal desu~: ${e.message}*`)
+  }
+}
+
+handler.command = ['playlist', 'ytplaylist']
+export default handler
