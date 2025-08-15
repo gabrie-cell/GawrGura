@@ -1,8 +1,6 @@
 const fetch = require('node-fetch');
-const ytpl = require('ytpl');
 const fs = require('fs');
 const path = require('path');
-const ytdlp = require('yt-dlp-exec');
 const archiver = require('archiver');
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
@@ -11,36 +9,39 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     let url = args[0];
     if (!url.includes('playlist?list=')) return m.reply('❌ El enlace no es una playlist válida de YouTube.');
 
-    await m.reply('⏳ Obteniendo lista de canciones...');
+    await m.reply('⏳ Obteniendo lista de canciones desde API...');
 
     try {
-        let playlist = await ytpl(url, { limit: Infinity });
-        let total = playlist.items.length;
-        await conn.sendMessage(m.chat, { text: `📀 *Playlist:* ${playlist.title}\n🎶 *Total canciones:* ${total}\n\n▶️ Descargando todas las canciones...` }, { quoted: m });
+        // API para obtener playlist
+        let res = await fetch(`https://api.lolhuman.xyz/api/ytplaylist?apikey=GATA_DIOS&url=${encodeURIComponent(url)}`);
+        let json = await res.json();
+
+        if (!json.result || !json.result.video || json.result.video.length === 0) {
+            return m.reply('❌ No se pudo obtener la playlist.');
+        }
+
+        let total = json.result.video.length;
+        await m.reply(`📀 *Playlist:* ${json.result.title}\n🎶 *Total canciones:* ${total}\n\n▶️ Descargando desde API...`);
 
         let archivos = [];
 
         for (let i = 0; i < total; i++) {
-            let video = playlist.items[i];
-            let output = path.join(__dirname, `temp_${Date.now()}_${i}.mp3`);
+            let vid = json.result.video[i];
+            let audioUrl = `https://api.lolhuman.xyz/api/ytaudio2?apikey=GATA_DIOS&url=${encodeURIComponent(vid.url)}`;
+            let filePath = path.join(__dirname, `temp_${Date.now()}_${i}.mp3`);
 
-            // Mensaje de progreso
-            await conn.sendMessage(m.chat, { text: `🎶 Descargando ${i + 1}/${total} canciones...\n▶️ ${video.title}` }, { quoted: m });
-
-            await ytdlp(video.url, {
-                extractAudio: true,
-                audioFormat: 'mp3',
-                audioQuality: 0,
-                output
-            });
+            let audioRes = await fetch(audioUrl);
+            let buffer = await audioRes.buffer();
+            fs.writeFileSync(filePath, buffer);
 
             archivos.push({
-                path: output,
-                title: video.title
+                path: filePath,
+                title: vid.title
             });
         }
 
         if (total > 20) {
+            // Comprimir a ZIP
             let zipPath = path.join(__dirname, `playlist_${Date.now()}.zip`);
             let outputZip = fs.createWriteStream(zipPath);
             let archive = archiver('zip', { zlib: { level: 9 } });
@@ -55,7 +56,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                 await conn.sendMessage(m.chat, {
                     document: fs.readFileSync(zipPath),
                     mimetype: 'application/zip',
-                    fileName: `${playlist.title}.zip`
+                    fileName: `${json.result.title}.zip`
                 }, { quoted: m });
 
                 archivos.forEach(a => fs.unlinkSync(a.path));
@@ -65,25 +66,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             });
 
         } else {
-            await m.reply('✅ Descargas completas, enviando playlist...');
-
             for (let { path: filePath, title } of archivos) {
-                let stats = fs.statSync(filePath);
-                let sizeMB = stats.size / (1024 * 1024);
-
-                if (sizeMB > 15) {
-                    await conn.sendMessage(m.chat, {
-                        document: fs.readFileSync(filePath),
-                        mimetype: 'audio/mpeg',
-                        fileName: `${title}.mp3`
-                    }, { quoted: m });
-                } else {
-                    await conn.sendMessage(m.chat, {
-                        audio: fs.readFileSync(filePath),
-                        mimetype: 'audio/mpeg',
-                        fileName: `${title}.mp3`
-                    }, { quoted: m });
-                }
+                await conn.sendMessage(m.chat, {
+                    audio: fs.readFileSync(filePath),
+                    mimetype: 'audio/mpeg',
+                    fileName: `${title}.mp3`
+                }, { quoted: m });
 
                 fs.unlinkSync(filePath);
             }
