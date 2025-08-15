@@ -1,63 +1,43 @@
 import fetch from 'node-fetch'
 
-let handler = async (m, { conn, usedPrefix, command, text }) => {
-  if (!text) return m.reply(`🦈 *¡Eh buba~! Ingresa una playlist de YouTube desu~*\n🌊 *Ejemplo:* ${usedPrefix + command} https://youtube.com/playlist?list=PL...`)
+let handler = async (m, { conn, text }) => {
+  if (!text) return m.reply(`🦈 Ingresa una URL de playlist de YouTube\nEj: .playlist https://youtube.com/playlist?list=...`)
 
   try {
-    // 1️⃣ Obtener info de la playlist
-    let playlistRes = await fetch(`https://delirius-apiofc.vercel.app/ytplaylist?url=${encodeURIComponent(text)}`)
-    let playlist = await playlistRes.json()
+    // Obtener datos de playlist con API estable
+    let info = await fetch(`https://api-pip.ywftools.com/ytplaylist?url=${encodeURIComponent(text)}`)
+    let playlist = await info.json()
 
-    if (!playlist.data || !playlist.data.length) return m.reply('❌ *Awww~ No encontré esa playlist buba~.*')
+    if (!playlist || !playlist.videos || playlist.videos.length === 0) {
+      return m.reply('❌ No pude obtener esa playlist buba~')
+    }
 
-    await m.reply(`📀 *Encontré ${playlist.data.length} canciones en la playlist*\n🦈 Empezando a descargarlas...`)
+    await m.reply(`📀 Encontré ${playlist.videos.length} canciones\n🎵 Empezando descargas...`)
 
-    // 2️⃣ Procesar y enviar cada canción
-    for (let video of playlist.data) {
+    for (let video of playlist.videos) {
       try {
-        // Buscar audio usando APIs
-        let audioUrl = null
-        const apis = [
-          `https://theadonix-api.vercel.app/api/ytmp3?url=${encodeURIComponent(video.url)}`,
-          `https://api.ytjar.download/audio?url=${encodeURIComponent(video.url)}`
-        ]
+        let dl = await fetch(`https://api-pip.ywftools.com/ytmp3?url=${encodeURIComponent(video.url)}`)
+        let json = await dl.json()
 
-        for (const api of apis) {
-          try {
-            const res = await fetch(api)
-            const json = await res.json()
-            if (json?.result?.audio) {
-              audioUrl = json.result.audio
-              break
-            } else if (json?.url) {
-              audioUrl = json.url
-              break
-            }
-          } catch {}
-        }
-
-        if (audioUrl) {
+        if (json?.status && json?.audio) {
           await conn.sendMessage(m.chat, {
-            audio: { url: audioUrl },
+            audio: { url: json.audio },
             mimetype: 'audio/mpeg',
-            fileName: `${video.title}.mp3`,
-            ptt: true
+            fileName: `${video.title}.mp3`
           }, { quoted: m })
         } else {
-          await m.reply(`❌ No pude descargar: *${video.title}*`)
+          await m.reply(`⚠️ No pude descargar: ${video.title}`)
         }
-
       } catch (err) {
-        console.error(`Error con ${video.title}`, err)
-        await m.reply(`⚠️ Error descargando: *${video.title}*`)
+        await m.reply(`⚠️ Error descargando: ${video.title}`)
       }
     }
 
-    await m.reply(`✅ *Playlist completa buba~* 🦈`)
+    await m.reply(`✅ Playlist completa buba~ 🦈`)
 
   } catch (e) {
     console.error(e)
-    m.reply(`❌ *Gyaa~ Algo salió mal desu~: ${e.message}*`)
+    m.reply('❌ Error al procesar la playlist')
   }
 }
 
