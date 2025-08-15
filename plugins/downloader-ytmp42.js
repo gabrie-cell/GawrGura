@@ -2,10 +2,13 @@ import fetch from 'node-fetch';
 import ytdl from 'ytdl-core';
 import yts from 'yt-search';
 
-// 🔹 Lista de 10 API keys gratuitas (puedes agregar más)
+// 🔹 APIs de descarga
+const primaryAPI = (encodedUrl) => `https://theadonix-api.vercel.app/api/ytmp3?url=${encodedUrl}`;
+const backupAPI1 = (encodedUrl) => `https://api.vreden.my.id/api/ytmp3?url=${encodedUrl}`;
+const backupAPI2 = (encodedUrl) => `https://delirius-apiofc.vercel.app/download/ytmp3?url=${encodedUrl}`;
+
+// 🔹 Lista de API keys de búsqueda
 const API_KEYS = [
-  'https://delirius-apiofc.vercel.app/download/ytmp3?url=https://youtu.be/TdrL3QxjyVw',
-  'https://delirius-apiofc.vercel.app/download/ytmp3?url=https://youtu.be/TdrL3QxjyVw',
   'AIzaSyA3-PRUEBA3',
   'AIzaSyA4-PRUEBA4',
   'AIzaSyA5-PRUEBA5',
@@ -23,16 +26,22 @@ function getRandomApiKey() {
 
 const handler = async (m, { conn, args, usedPrefix }) => {
   if (!args[0]) {
-    return conn.reply(m.chat, `✏️ Ingresa un título para buscar en YouTube.
-
-Ejemplo:
-> ${usedPrefix}play Corazón Serrano - Mix Poco Yo`, m);
+    return conn.reply(m.chat, `✏️ Ingresa un título para buscar en YouTube.\n\nEjemplo:\n> ${usedPrefix}play Corazón Serrano - Mix Poco Yo`, m);
   }
 
-  await m.react('🔍');
-  await conn.sendMessage(m.chat, { 
-    text: `⏳ *Buscando...*\n🔎 ${args.join(" ")}\n_Por favor espera un momento..._`, 
-  }, { quoted: m });
+  // 🔹 Animación de carga
+  const mensajesCarga = [
+    "🔍 Buscando la canción...",
+    "🎵 Encontrando el mejor resultado...",
+    "⏳ Preparando tu audio...",
+    "📥 Descargando archivo...",
+    "✅ ¡Listo! Enviando..."
+  ];
+
+  for (let msg of mensajesCarga) {
+    await conn.sendMessage(m.chat, { text: msg }, { quoted: m });
+    await new Promise(res => setTimeout(res, 1000));
+  }
 
   try {
     let videoInfo;
@@ -72,22 +81,69 @@ Ejemplo:
     // 3️⃣ Enviar información
     await conn.sendMessage(m.chat, {
       image: thumbnail,
-      caption: `🎥 *Video encontrado*\n📌 Título: ${videoInfo.title}\n🔗 Enlace: ${videoInfo.url}`,
+      caption: `🎥 *Video encontrado*\n📌 *Título:* ${videoInfo.title}\n🔗 *Enlace:* ${videoInfo.url}`
     }, { quoted: m });
 
-    // 4️⃣ Descargar y enviar audio MP3
-    const audioStream = ytdl(videoInfo.url, { filter: 'audioonly', quality: 'highestaudio' });
-    await conn.sendMessage(m.chat, {
-      audio: { stream: audioStream },
-      mimetype: 'audio/mpeg',
-      fileName: `${videoInfo.title}.mp3`
-    }, { quoted: m });
+    // 4️⃣ Intentar descarga con APIs
+    const encodedUrl = encodeURIComponent(videoInfo.url);
+    let audioBuffer;
 
-    await m.react('✅');
+    try {
+      // API primaria
+      const res1 = await fetch(primaryAPI(encodedUrl));
+      if (res1.ok) {
+        const json = await res1.json();
+        if (json.result?.download_url) {
+          audioBuffer = await (await fetch(json.result.download_url)).buffer();
+        }
+      }
+    } catch {}
+
+    if (!audioBuffer) {
+      try {
+        // API de respaldo 1
+        const res2 = await fetch(backupAPI1(encodedUrl));
+        if (res2.ok) {
+          const json = await res2.json();
+          if (json.result?.download_url) {
+            audioBuffer = await (await fetch(json.result.download_url)).buffer();
+          }
+        }
+      } catch {}
+    }
+
+    if (!audioBuffer) {
+      try {
+        // API de respaldo 2 (DELIRIUS)
+        const res3 = await fetch(backupAPI2(encodedUrl));
+        if (res3.ok) {
+          const json = await res3.json();
+          if (json.result?.download_url) {
+            audioBuffer = await (await fetch(json.result.download_url)).buffer();
+          }
+        }
+      } catch {}
+    }
+
+    // 5️⃣ Enviar audio
+    if (audioBuffer) {
+      await conn.sendMessage(m.chat, {
+        audio: audioBuffer,
+        mimetype: 'audio/mpeg',
+        fileName: `${videoInfo.title}.mp3`
+      }, { quoted: m });
+    } else {
+      // Último recurso: YTDL local
+      const audioStream = ytdl(videoInfo.url, { filter: 'audioonly', quality: 'highestaudio' });
+      await conn.sendMessage(m.chat, {
+        audio: { stream: audioStream },
+        mimetype: 'audio/mpeg',
+        fileName: `${videoInfo.title}.mp3`
+      }, { quoted: m });
+    }
 
   } catch (e) {
     console.error(e);
-    await m.react('❌');
     conn.reply(m.chat, '❗ Ocurrió un error al buscar o enviar el audio.', m);
   }
 };
