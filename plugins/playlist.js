@@ -1,8 +1,12 @@
 // playlist.js
-const fetch = require('node-fetch');
-const fs = require('fs');
-const path = require('path');
-const archiver = require('archiver');
+import fetch from 'node-fetch';
+import fs from 'fs';
+import path from 'path';
+import archiver from 'archiver';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 let handler = async (m, { conn, args, text, usedPrefix, command }) => {
     let url = args[0] || text.trim();
@@ -13,16 +17,16 @@ let handler = async (m, { conn, args, text, usedPrefix, command }) => {
     await m.reply('⏳ Obteniendo lista de canciones desde API...');
 
     try {
-        // Obtener info de playlist (API gratuita de lolhuman)
+        // API gratuita
         let res = await fetch(`https://api.lolhuman.xyz/api/ytplaylist?apikey=GATA_DIOS&url=${encodeURIComponent(url)}`);
         let json = await res.json();
 
-        if (!json.result || !json.result.video || json.result.video.length === 0) {
+        if (!json.result?.video?.length) {
             return m.reply('❌ No se pudo obtener la playlist.');
         }
 
         let total = json.result.video.length;
-        await m.reply(`📀 *Playlist:* ${json.result.title}\n🎶 *Total canciones:* ${total}\n\n▶️ Descargando desde API...`);
+        await m.reply(`📀 *Playlist:* ${json.result.title}\n🎶 *Total canciones:* ${total}\n\n▶️ Descargando...`);
 
         let archivos = [];
 
@@ -44,9 +48,9 @@ let handler = async (m, { conn, args, text, usedPrefix, command }) => {
             let archive = archiver('zip', { zlib: { level: 9 } });
 
             archive.pipe(outputZip);
-            for (let { path: filePath, title } of archivos) {
+            archivos.forEach(({ path: filePath, title }) => {
                 archive.file(filePath, { name: `${title}.mp3` });
-            }
+            });
             await archive.finalize();
 
             outputZip.on('close', async () => {
@@ -69,10 +73,8 @@ let handler = async (m, { conn, args, text, usedPrefix, command }) => {
                     mimetype: 'audio/mpeg',
                     fileName: `${title}.mp3`
                 }, { quoted: m });
-
                 fs.unlinkSync(filePath);
             }
-
             await m.reply('🎉 Playlist enviada completa.');
         }
 
@@ -82,10 +84,10 @@ let handler = async (m, { conn, args, text, usedPrefix, command }) => {
     }
 };
 
-// 🔹 Detecta con o sin prefijo
+// Detecta con o sin prefijo
 handler.customPrefix = /^(playlist|pl)$/i;
 handler.command = new RegExp;
 handler.help = ['playlist <url>'];
 handler.tags = ['descargas'];
 
-module.exports = handler;
+export default handler;
