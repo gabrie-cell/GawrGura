@@ -1,114 +1,97 @@
-import axios from 'axios';
-import { spawn } from 'child_process';
-import fs from 'fs';
-import path from 'path';
+import fetch from 'node-fetch'
+import ytdlp from 'yt-dlp-exec'
+import fs from 'fs'
+import path from 'path'
 
-export async function comandoPlaylist(sock, chatId, playlistUrl) {
-  try {
-    // 1️⃣ Obtener links de videos en la playlist
-    let videoLinks = [];
+// Descargar desde APIs públicas
+async function descargarDesdeAPIs(url) {
+  const apis = [
+    `https://delirius-apiofc.vercel.app/download/ytmp3?url=${encodeURIComponent(url)}`,
+    `https://api.vevioz.com/api/button/mp3/${encodeURIComponent(url)}`,
+    `https://api.ytjar.download/audio?url=${encodeURIComponent(url)}`
+  ]
+  for (const api of apis) {
     try {
-      const res = await axios.get(`https://api.cafirexos.com/api/ytplaylist?url=${encodeURIComponent(playlistUrl)}`);
-      if (res.data?.videos) {
-        videoLinks = res.data.videos.map(v => v.url);
-      }
-    } catch {
-      try {
-        const res = await axios.get(`https://api.luistar15.com/ytplaylist?url=${encodeURIComponent(playlistUrl)}`);
-        if (res.data?.videos) {
-          videoLinks = res.data.videos.map(v => v.url);
-        }
-      } catch {
-        console.log("⚠ No se pudo obtener con las APIs, probando con yt-dlp como último recurso...");
-        videoLinks = await getPlaylistLinksYT_DLP(playlistUrl);
-      }
-    }
+      const res = await fetch(api)
+      const data = await res.json()
+      if (data?.result?.audio) return data.result.audio
+      if (data?.url) return data.url
+      if (data?.links?.mp3) return data.links.mp3
+    } catch { }
+  }
+  return null
+}
 
-    if (!videoLinks.length) {
-      return await sock.sendMessage(chatId, { text: "❌ No se pudo obtener la playlist." });
-    }
-
-    // 2️⃣ Descargar y enviar cada canción
-    for (let link of videoLinks) {
-      let mp3Url = null;
-
-      // Intentar con la API de Delirius
-      try {
-        const res = await axios.get(`https://delirius-apiofc.vercel.app/download/ytmp3?url=${encodeURIComponent(link)}`);
-        if (res.data?.status && res.data?.data?.download?.url) {
-          mp3Url = res.data.data.download.url;
-        }
-      } catch {}
-
-      // Intentar con otra API pública
-      if (!mp3Url) {
-        try {
-          const res = await axios.get(`https://api.akuari.my.id/downloader/youtubeaudio?link=${encodeURIComponent(link)}`);
-          if (res.data?.success && res.data?.result?.link) {
-            mp3Url = res.data.result.link;
-          }
-        } catch {}
-      }
-
-      // Usar yt-dlp como último recurso
-      if (!mp3Url) {
-        mp3Url = await downloadWithYTDLP(link);
-      }
-
-      if (mp3Url) {
-        try {
-          const filename = `${Date.now()}.mp3`;
-          const filePath = path.join(process.cwd(), filename);
-          const response = await axios({ url: mp3Url, method: 'GET', responseType: 'stream' });
-
-          await new Promise((resolve, reject) => {
-            const writer = fs.createWriteStream(filePath);
-            response.data.pipe(writer);
-            writer.on('finish', resolve);
-            writer.on('error', reject);
-          });
-
-          const stats = fs.statSync(filePath);
-          if (stats.size > 10 * 1024 * 1024) {
-            await sock.sendMessage(chatId, { document: fs.readFileSync(filePath), mimetype: 'audio/mpeg', fileName: filename });
-          } else {
-            await sock.sendMessage(chatId, { audio: fs.readFileSync(filePath), mimetype: 'audio/mpeg' });
-          }
-          fs.unlinkSync(filePath);
-        } catch (err) {
-          console.error("Error enviando canción:", err.message);
-        }
-      }
-    }
-  } catch (err) {
-    console.error(err);
-    await sock.sendMessage(chatId, { text: "❌ Error procesando la playlist." });
+// Descargar con yt-dlp como último recurso
+async function descargarConYtDlp(url) {
+  try {
+    const filePath = path.resolve(`./temp_${Date.now()}.mp3`)
+    await ytdlp(url, {
+      extractAudio: true,
+      audioFormat: 'mp3',
+      output: filePath
+    })
+    return filePath
+  } catch {
+    return null
   }
 }
 
-// Obtener links usando yt-dlp
-async function getPlaylistLinksYT_DLP(url) {
-  return new Promise((resolve) => {
-    const links = [];
-    const yt = spawn('yt-dlp', ['--flat-playlist', '--print', 'url', url]);
+let handler = async (m, { conn, args }) => {
+  if (!args[0]) return m.reply('🎵 Debes poner el enlace de la playlist de YouTube.')
 
-    yt.stdout.on('data', (data) => {
-      links.push(...data.toString().trim().split('\n'));
-    });
+  const playlistUrl = args[0]
+  if (!playlistUrl.includes('list=')) return m.reply('❌ Ese enlace no es de una playlist.')
 
-    yt.on('close', () => resolve(links));
-    yt.on('error', () => resolve([]));
-  });
+  await m.reply('🔍 Obteniendo lista de videos...')
+
+  try {
+    // Obtener lista de videos
+    const res = await fetch(`https://delirius-apiofc.vercel.app/playlist/yt?url=${encodeURIComponent(playlistUrl)}`)
+    const playlistData = await res.json()
+
+    if (!playlistData.data || playlistData.data.length === 0) {
+      return m.reply('❌ No pude obtener los videos de la playlist.')
+    }
+
+    await m.reply(`📀 Playlist encontrada con ${playlistData.data.length} videos. Comenzando descarga...`)
+
+    for (const video of playlistData.data) {
+      let audioUrl = await descargarDesdeAPIs(video.url)
+
+      if (audioUrl) {
+        let audioRes = await fetch(audioUrl)
+        let audioBuffer = await audioRes.buffer()
+        await conn.sendMessage(m.chat, {
+          audio: audioBuffer,
+          mimetype: 'audio/mpeg',
+          fileName: `${video.title}.mp3`
+        }, { quoted: m })
+      } else {
+        let filePath = await descargarConYtDlp(video.url)
+        if (filePath) {
+          let audioBuffer = fs.readFileSync(filePath)
+          await conn.sendMessage(m.chat, {
+            audio: audioBuffer,
+            mimetype: 'audio/mpeg',
+            fileName: `${video.title}.mp3`
+          }, { quoted: m })
+          fs.unlinkSync(filePath)
+        } else {
+          await m.reply(`❌ No pude descargar: ${video.title}`)
+        }
+      }
+    }
+
+    await m.reply('✅ Playlist enviada completa.')
+  } catch (e) {
+    console.error(e)
+    await m.reply('❌ Error procesando la playlist.')
+  }
 }
 
-// Descargar mp3 con yt-dlp
-async function downloadWithYTDLP(url) {
-  return new Promise((resolve) => {
-    const filename = `${Date.now()}.mp3`;
-    const outputPath = path.join(process.cwd(), filename);
-    const yt = spawn('yt-dlp', ['-x', '--audio-format', 'mp3', '-o', outputPath, url]);
+handler.command = ['playlist', 'ytplaylist']
+handler.help = ['playlist <url>']
+handler.tags = ['downloader']
 
-    yt.on('close', () => resolve(outputPath));
-    yt.on('error', () => resolve(null));
-  });
-}
+export default handler
