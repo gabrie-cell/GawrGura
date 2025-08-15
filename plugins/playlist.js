@@ -1,45 +1,77 @@
-import fetch from 'node-fetch'
+import fetch from 'node-fetch';
+import { spawn } from 'child_process';
+import fs from 'fs';
+import path from 'path';
 
 let handler = async (m, { conn, text }) => {
-  if (!text) return m.reply(`🦈 Ingresa una URL de playlist de YouTube\nEj: .playlist https://youtube.com/playlist?list=...`)
+  if (!text) return m.reply('📀 Ingresa la URL de la playlist de YouTube');
 
-  try {
-    // Obtener datos de playlist con API estable
-    let info = await fetch(`https://api-pip.ywftools.com/ytplaylist?url=${encodeURIComponent(text)}`)
-    let playlist = await info.json()
+  const tempDir = './temp_playlist';
+  if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
 
-    if (!playlist || !playlist.videos || playlist.videos.length === 0) {
-      return m.reply('❌ No pude obtener esa playlist buba~')
-    }
+  m.reply('🔍 Obteniendo lista de videos...');
 
-    await m.reply(`📀 Encontré ${playlist.videos.length} canciones\n🎵 Empezando descargas...`)
+  // Obtener títulos y URLs de la playlist con yt-dlp (modo rápido)
+  const list = spawn('yt-dlp', ['--flat-playlist', '--print', 'title', '--print', 'url', text]);
 
-    for (let video of playlist.videos) {
+  let output = '';
+  list.stdout.on('data', data => { output += data.toString(); });
+
+  list.on('close', async () => {
+    let lines = output.trim().split('\n');
+
+    for (let i = 0; i < lines.length; i += 2) {
+      let title = lines[i];
+      let url = lines[i + 1];
+      m.reply(`🎵 Descargando: ${title}`);
+
+      let filePath = path.join(tempDir, `${title.replace(/[\/\\?%*:|"<>]/g, '_')}.mp3`);
+
+      // Primero intentar con la API Delirius
+      let downloaded = false;
       try {
-        let dl = await fetch(`https://api-pip.ywftools.com/ytmp3?url=${encodeURIComponent(video.url)}`)
-        let json = await dl.json()
+        let apiUrl = `https://delirius-apiofc.vercel.app/download/ytmp3?url=${url}`;
+        let res = await fetch(apiUrl);
+        let json = await res.json();
 
-        if (json?.status && json?.audio) {
-          await conn.sendMessage(m.chat, {
-            audio: { url: json.audio },
-            mimetype: 'audio/mpeg',
-            fileName: `${video.title}.mp3`
-          }, { quoted: m })
-        } else {
-          await m.reply(`⚠️ No pude descargar: ${video.title}`)
+        if (json.status && json.download?.url) {
+          let audioRes = await fetch(json.download.url);
+          let buffer = await audioRes.arrayBuffer();
+          fs.writeFileSync(filePath, Buffer.from(buffer));
+          downloaded = true;
         }
-      } catch (err) {
-        await m.reply(`⚠️ Error descargando: ${video.title}`)
+      } catch (e) {
+        console.error(`❌ API Delirius falló para ${title}`, e);
+      }
+
+      // Si la API falla, usar yt-dlp local
+      if (!downloaded) {
+        await new Promise((resolve, reject) => {
+          const dl = spawn('yt-dlp', [
+            '-x', '--audio-format', 'mp3', '-o', filePath, url
+          ]);
+
+          dl.on('close', resolve);
+          dl.on('error', reject);
+        });
+      }
+
+      // Enviar audio
+      try {
+        await conn.sendMessage(m.chat, {
+          audio: fs.readFileSync(filePath),
+          mimetype: 'audio/mpeg',
+          fileName: `${title}.mp3`
+        }, { quoted: m });
+        fs.unlinkSync(filePath);
+      } catch (e) {
+        console.error(e);
       }
     }
 
-    await m.reply(`✅ Playlist completa buba~ 🦈`)
+    m.reply('✅ Playlist enviada completa');
+  });
+};
 
-  } catch (e) {
-    console.error(e)
-    m.reply('❌ Error al procesar la playlist')
-  }
-}
-
-handler.command = ['playlist', 'ytplaylist']
-export default handler
+handler.command = ['playlist'];
+export default handler;
