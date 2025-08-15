@@ -212,10 +212,10 @@ global.prefix = ['.', '/', '#', '!']
 
 ## 📊 Estadísticas del Proyecto
 
-![Languages](https://img.shields.io/github/languages/top/tu-usuario/tu-repo?style=for-the-badge)
-![Size](https://img.shields.io/github/repo-size/tu-usuario/tu-repo?style=for-the-badge)
-![Issues](https://img.shields.io/github/issues/tu-usuario/tu-repo?style=for-the-badge)
-![License](https://img.shields.io/github/license/tu-usuario/tu-repo?style=for-the-badge)
+![Languages](https://img.shields.io/github/languages/top/Andresv27728/GawrGura?style=for-the-badge)
+![Size](https://img.shields.io/github/repo-size/Andresv27728/GawrGura?style=for-the-badge)
+![Issues](https://img.shields.io/github/issues/Andresv27728/GawrGura?style=for-the-badge)
+![License](https://img.shields.io/github/license/Andresv27728/GawrGura?style=for-the-badge)
 
 ## 💝 Donaciones
 
