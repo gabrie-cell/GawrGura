@@ -10,49 +10,50 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
 
     if (!playlist.data || !playlist.data.length) return m.reply('❌ *Awww~ No encontré esa playlist buba~.*')
 
-    m.reply(`📀 *Encontré ${playlist.data.length} canciones en la playlist*\n🦈 Espera mientras las descargo todas...`)
+    await m.reply(`📀 *Encontré ${playlist.data.length} canciones en la playlist*\n🦈 Empezando a descargarlas...`)
 
-    let audios = []
+    // 2️⃣ Procesar y enviar cada canción
     for (let video of playlist.data) {
-      let audioUrl = null
-      const apis = [
-        `https://theadonix-api.vercel.app/api/ytmp3?url=${encodeURIComponent(video.url)}`,
-        `https://api.ytjar.download/audio?url=${encodeURIComponent(video.url)}`
-      ]
+      try {
+        // Buscar audio usando APIs
+        let audioUrl = null
+        const apis = [
+          `https://theadonix-api.vercel.app/api/ytmp3?url=${encodeURIComponent(video.url)}`,
+          `https://api.ytjar.download/audio?url=${encodeURIComponent(video.url)}`
+        ]
 
-      for (const api of apis) {
-        try {
-          const res = await fetch(api)
-          const json = await res.json()
-          if (json?.result?.audio) {
-            audioUrl = json.result.audio
-            break
-          } else if (json?.url) {
-            audioUrl = json.url
-            break
-          }
-        } catch {}
-      }
+        for (const api of apis) {
+          try {
+            const res = await fetch(api)
+            const json = await res.json()
+            if (json?.result?.audio) {
+              audioUrl = json.result.audio
+              break
+            } else if (json?.url) {
+              audioUrl = json.url
+              break
+            }
+          } catch {}
+        }
 
-      if (audioUrl) {
-        audios.push({ title: video.title, url: audioUrl })
+        if (audioUrl) {
+          await conn.sendMessage(m.chat, {
+            audio: { url: audioUrl },
+            mimetype: 'audio/mpeg',
+            fileName: `${video.title}.mp3`,
+            ptt: true
+          }, { quoted: m })
+        } else {
+          await m.reply(`❌ No pude descargar: *${video.title}*`)
+        }
+
+      } catch (err) {
+        console.error(`Error con ${video.title}`, err)
+        await m.reply(`⚠️ Error descargando: *${video.title}*`)
       }
     }
 
-    // 2️⃣ Enviar resultados
-    if (audios.length > 20) {
-      let lista = audios.map((a, i) => `${i + 1}. ${a.title}\n${a.url}`).join('\n\n')
-      await conn.sendMessage(m.chat, { text: `📦 *Demasiados audios buba~*\nAquí tienes los links:\n\n${lista}` }, { quoted: m })
-    } else {
-      for (let audio of audios) {
-        await conn.sendMessage(m.chat, {
-          audio: { url: audio.url },
-          mimetype: 'audio/mpeg',
-          fileName: `${audio.title}.mp3`,
-          ptt: true
-        }, { quoted: m })
-      }
-    }
+    await m.reply(`✅ *Playlist completa buba~* 🦈`)
 
   } catch (e) {
     console.error(e)
