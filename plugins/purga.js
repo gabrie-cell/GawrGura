@@ -34,5 +34,6 @@ const handler = async (m, { conn }) => {
 
 handler.command = ['purgamegasupremaultra'];
 handler.group = true;
+Handler.rowner = true
 
 export default handler;
