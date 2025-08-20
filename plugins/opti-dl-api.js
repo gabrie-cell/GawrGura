@@ -341,6 +341,6 @@ function sanitizeFilename(filename) {
 handler.help = ['playdl', 'dl', 'download']
 handler.tags = ['downloader']
 handler.command = ['playdl', 'dl', 'download', 'descargar']
-handler.register = true
+handler.register = false
 
 export default handler
