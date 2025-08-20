@@ -1,10 +1,8 @@
-
 import fetch from 'node-fetch'
 import yts from 'yt-search'
-import '../lib/OptiShield.js'
 
 let handler = async (m, { conn, args, usedPrefix, command, text }) => {
-  
+
   // Verificar que OptiShield esté disponible
   if (!global.optishieldAPI) {
     return m.reply('❌ *OptiShield no está disponible. Verifica la configuración.*')
@@ -50,7 +48,7 @@ let handler = async (m, { conn, args, usedPrefix, command, text }) => {
       // Procesar descarga
       await processDownload(conn, m, videoUrl, video.title)
     }
-    
+
     // Comando para links directos
     else if (command === 'dl' || command === 'download') {
       if (!args[0]) {
@@ -58,7 +56,7 @@ let handler = async (m, { conn, args, usedPrefix, command, text }) => {
       }
 
       const url = args[0]
-      
+
       // Validar URL
       if (!isValidUrl(url)) {
         return m.reply('❌ *URL inválida. Por favor proporciona un enlace válido.*')
@@ -83,99 +81,108 @@ async function processDownload(conn, m, url, title = null) {
   try {
     // Detectar tipo de plataforma
     const platform = detectPlatform(url)
-    
-    // Preparar parámetros para OptiShield
-    const downloadParams = {
-      type: 'download',
-      url: url,
-      platform: platform,
-      quality: 'best',
-      format: 'both' // audio y video
-    }
 
-    // Usar la API de OptiShield
-    global.optishieldAPI.logger({ 
-      texto: `Iniciando descarga de: ${url}`, 
-      tipo: 'info' 
+    // Usar la API de OptiShield con el formato correcto
+    global.optishieldAPI.logger({
+      texto: `Iniciando descarga de: ${url}`,
+      tipo: 'info'
     })
 
-    const result = await global.optishieldAPI.sendMessage(downloadParams)
+    // Usar sendMessage con el tipo ytdl como especificaste
+    const result = await global.optishieldAPI.sendMessage({
+      type: "ytdl",
+      link: url
+    })
 
     if (result.error) {
       throw new Error(result.error)
     }
 
-    // Procesar resultado según la respuesta de OptiShield
-    if (result.video_url && result.audio_url) {
-      // Ambos formatos disponibles
-      await m.reply('📥 *¡Descarga completada! Enviando archivos...*')
-      
-      // Enviar video
-      if (result.video_url) {
-        await conn.sendMessage(m.chat, {
-          video: { url: result.video_url },
-          caption: `🎥 *Video:* ${title || result.title || 'Descarga'}\n🔗 *Fuente:* ${url}`,
-          fileName: `${title || 'video'}.mp4`
-        }, { quoted: m })
-      }
-
-      // Enviar audio
-      if (result.audio_url) {
-        await conn.sendMessage(m.chat, {
-          audio: { url: result.audio_url },
-          mimetype: 'audio/mpeg',
-          fileName: `${title || 'audio'}.mp3`
-        }, { quoted: m })
-      }
-    }
-    else if (result.download_url) {
-      // URL de descarga única
-      const fileBuffer = await global.optishieldAPI.getBuffer(result.download_url)
-      
-      // Determinar tipo de archivo
-      if (result.type === 'video' || url.includes('youtube') || url.includes('tiktok')) {
-        await conn.sendMessage(m.chat, {
-          video: fileBuffer,
-          caption: `🎥 *Descargado:* ${title || result.title || 'Video'}\n🔗 *Fuente:* ${url}`,
-          fileName: `${title || 'video'}.mp4`
-        }, { quoted: m })
-      } else {
-        await conn.sendMessage(m.chat, {
-          audio: fileBuffer,
-          mimetype: 'audio/mpeg',
-          fileName: `${title || 'audio'}.mp3`
-        }, { quoted: m })
-      }
-    }
-    else {
-      // Método alternativo usando uploadFile de OptiShield
-      const uploadResult = await global.optishieldAPI.uploadFile(result.buffer || result.data, 'mp4')
-      
-      if (uploadResult.url) {
-        const buffer = await global.optishieldAPI.getBuffer(uploadResult.url)
-        
-        await conn.sendMessage(m.chat, {
-          video: buffer,
-          caption: `🎥 *Descargado:* ${title || 'Video'}\n🔗 *Fuente:* ${url}`,
-          fileName: `${title || 'video'}.mp4`
-        }, { quoted: m })
-      }
-    }
-
-    // Log de éxito
-    global.optishieldAPI.logger({ 
-      texto: `Descarga exitosa de: ${url}`, 
-      tipo: 'info' 
+    // Log de la respuesta para debug
+    global.optishieldAPI.logger({
+      texto: `Respuesta OptiShield: ${JSON.stringify(result)}`,
+      tipo: 'debug'
     })
 
-    await m.react('✅')
+    // Procesar resultado según la respuesta de OptiShield
+    if (result.success || result.status === 'success') {
+      await m.reply('📥 *¡Descarga completada! Enviando archivos...*')
+
+      // Diferentes formatos de respuesta posibles
+      let videoUrl = result.video_url || result.video || result.url || result.download_url
+      let audioUrl = result.audio_url || result.audio
+      let resultTitle = result.title || title || 'Descarga'
+      let thumbnail = result.thumbnail || result.thumb
+
+      // Enviar video si está disponible
+      if (videoUrl) {
+        try {
+          await conn.sendMessage(m.chat, {
+            video: { url: videoUrl },
+            caption: `🎥 *${resultTitle}*\n🔗 *Fuente:* ${url}\n📡 *Powered by OptiShield*`,
+            fileName: `${sanitizeFilename(resultTitle)}.mp4`
+          }, { quoted: m })
+        } catch (videoError) {
+          global.optishieldAPI.logger({
+            texto: `Error enviando video: ${videoError.message}`,
+            tipo: 'error'
+          })
+        }
+      }
+
+      // Enviar audio si está disponible
+      if (audioUrl) {
+        try {
+          await conn.sendMessage(m.chat, {
+            audio: { url: audioUrl },
+            mimetype: 'audio/mpeg',
+            fileName: `${sanitizeFilename(resultTitle)}.mp3`
+          }, { quoted: m })
+        } catch (audioError) {
+          global.optishieldAPI.logger({
+            texto: `Error enviando audio: ${audioError.message}`,
+            tipo: 'error'
+          })
+        }
+      }
+
+      // Si no hay URLs directas, verificar si hay buffer o datos
+      if (!videoUrl && !audioUrl) {
+        if (result.buffer || result.data) {
+          try {
+            const fileBuffer = result.buffer || Buffer.from(result.data, 'base64')
+
+            await conn.sendMessage(m.chat, {
+              video: fileBuffer,
+              caption: `🎥 *${resultTitle}*\n🔗 *Fuente:* ${url}\n📡 *Powered by OptiShield*`,
+              fileName: `${sanitizeFilename(resultTitle)}.mp4`
+            }, { quoted: m })
+          } catch (bufferError) {
+            throw new Error('No se pudo procesar el archivo descargado')
+          }
+        } else {
+          throw new Error('No se encontraron archivos en la respuesta')
+        }
+      }
+
+      // Log de éxito
+      global.optishieldAPI.logger({
+        texto: `Descarga exitosa de: ${url}`,
+        tipo: 'info'
+      })
+
+      await m.react('✅')
+
+    } else {
+      throw new Error(result.message || 'Error desconocido en OptiShield')
+    }
 
   } catch (error) {
-    global.optishieldAPI.logger({ 
-      texto: `Error en descarga: ${error.message}`, 
-      tipo: 'error' 
+    global.optishieldAPI.logger({
+      texto: `Error en descarga OptiShield: ${error.message}`,
+      tipo: 'error'
     })
-    
+
     // Método de respaldo usando APIs tradicionales
     await fallbackDownload(conn, m, url, title)
   }
@@ -185,92 +192,35 @@ async function processDownload(conn, m, url, title = null) {
 async function fallbackDownload(conn, m, url, title) {
   try {
     m.reply('🔄 *Intentando método alternativo...*')
-    
+
     // APIs de respaldo públicas y gratuitas
     const apis = [
-      // YouTube APIs
+      // Cobalt (universal)
       {
-        name: 'YT-DLP API',
-        url: `https://api.cobalt.tools/api/json`,
+        name: 'Cobalt',
+        url: 'https://api.cobalt.tools/api/json',
         method: 'POST',
         body: { url: url, filenamePattern: 'basic', isAudioOnly: false }
       },
+      // Y2Mate
+      {
+        name: 'Y2Mate',
+        url: 'https://www.y2mate.com/mates/analyzeV2/ajax',
+        method: 'POST',
+        body: { k_query: url, k_page: 'home', hl: 'en', q_auto: 0 }
+      },
+      // SaveTube
       {
         name: 'SaveTube',
         url: `https://p.oceansaver.in/ajax/download.php?copyright=0&format=360&url=${encodeURIComponent(url)}`,
         method: 'GET'
       },
-      {
-        name: 'Y2Mate API',
-        url: `https://www.y2mate.com/mates/analyzeV2/ajax`,
-        method: 'POST',
-        body: { k_query: url, k_page: 'home', hl: 'en', q_auto: 0 }
-      },
+      // YT1s
       {
         name: 'YT1s',
-        url: `https://yt1s.com/api/ajaxSearch/index`,
+        url: 'https://yt1s.com/api/ajaxSearch/index',
         method: 'POST',
         body: { q: url, vt: 'home' }
-      },
-      {
-        name: 'Loader.to',
-        url: `https://loader.to/ajax/search.php?query=${encodeURIComponent(url)}`,
-        method: 'GET'
-      },
-      // APIs generales para múltiples plataformas
-      {
-        name: 'AllTube',
-        url: `https://api.alltubedownload.net/json?url=${encodeURIComponent(url)}`,
-        method: 'GET'
-      },
-      {
-        name: 'DownloadGram',
-        url: `https://downloadgram.com/api/video/info`,
-        method: 'POST',
-        body: { url: url }
-      },
-      {
-        name: 'SaveFrom',
-        url: `https://worker-nameless-river-5c0c.savefrom.workers.dev/?url=${encodeURIComponent(url)}`,
-        method: 'GET'
-      },
-      {
-        name: 'SnapSave',
-        url: `https://snapsave.app/action.php?lang=en`,
-        method: 'POST',
-        body: { url: url }
-      },
-      // APIs específicas para TikTok
-      {
-        name: 'TikMate',
-        url: `https://tikmate.online/download`,
-        method: 'POST',
-        body: { url: url }
-      },
-      {
-        name: 'SnapTik',
-        url: `https://snaptik.app/abc2.php`,
-        method: 'POST',
-        body: { url: url, lang: 'en' }
-      },
-      // APIs para Instagram
-      {
-        name: 'InstaDownloader',
-        url: `https://v3.saveig.app/api/ajaxSearch`,
-        method: 'POST',
-        body: { q: url, t: 'media', lang: 'en' }
-      },
-      // APIs generales adicionales
-      {
-        name: 'Universal Downloader',
-        url: `https://co.wuk.sh/api/json`,
-        method: 'POST',
-        body: { url: url }
-      },
-      {
-        name: 'VidPaw',
-        url: `https://www.vidpaw.com/download?url=${encodeURIComponent(url)}`,
-        method: 'GET'
       }
     ]
 
@@ -301,10 +251,9 @@ async function fallbackDownload(conn, m, url, title) {
         if (!response.ok) continue
 
         const data = await response.json()
-        
+
         // Procesar diferentes formatos de respuesta
         let videoUrl = null
-        let audioUrl = null
         let downloadTitle = title || 'Descarga'
 
         // Formato Cobalt
@@ -318,37 +267,15 @@ async function fallbackDownload(conn, m, url, title) {
           if (mess.vid) videoUrl = mess.vid
           if (mess.title) downloadTitle = mess.title
         }
-        // Formato YT1s
-        else if (data.status === 'ok' && data.mess) {
-          if (data.mess.vid) videoUrl = data.mess.vid
-          if (data.mess.title) downloadTitle = data.mess.title
-        }
-        // Formato SaveTube
-        else if (data.success && data.url) {
-          videoUrl = data.url
-          downloadTitle = data.title || downloadTitle
-        }
         // Formato genérico
         else if (data.result) {
           videoUrl = data.result.video || data.result.download_url || data.result.url
-          audioUrl = data.result.audio
           downloadTitle = data.result.title || downloadTitle
-        }
-        // Formato directo
-        else if (data.video_url || data.download_url || data.url) {
-          videoUrl = data.video_url || data.download_url || data.url
-          audioUrl = data.audio_url
-          downloadTitle = data.title || downloadTitle
-        }
-        // Formato para TikTok/Instagram
-        else if (data.medias && data.medias.length > 0) {
-          videoUrl = data.medias[0].url
-          downloadTitle = data.title || downloadTitle
         }
 
         if (videoUrl) {
           // Limpiar título
-          downloadTitle = downloadTitle.replace(/[^\w\s-]/g, '').substring(0, 50)
+          downloadTitle = sanitizeFilename(downloadTitle)
 
           // Enviar video
           try {
@@ -357,37 +284,12 @@ async function fallbackDownload(conn, m, url, title) {
               caption: `🎥 *${downloadTitle}*\n🔗 *Fuente:* ${url}\n📡 *API:* ${api.name}`,
               fileName: `${downloadTitle}.mp4`
             }, { quoted: m })
-            
+
             success = true
+            break
           } catch (sendError) {
-            // Si falla el envío, intentar como buffer
-            try {
-              const buffer = await fetch(videoUrl).then(res => res.buffer())
-              await conn.sendMessage(m.chat, {
-                video: buffer,
-                caption: `🎥 *${downloadTitle}*\n🔗 *Fuente:* ${url}\n📡 *API:* ${api.name}`,
-                fileName: `${downloadTitle}.mp4`
-              }, { quoted: m })
-              success = true
-            } catch (bufferError) {
-              continue
-            }
+            continue
           }
-
-          // Enviar audio si está disponible
-          if (audioUrl && success) {
-            try {
-              await conn.sendMessage(m.chat, {
-                audio: { url: audioUrl },
-                mimetype: 'audio/mpeg',
-                fileName: `${downloadTitle}.mp3`
-              }, { quoted: m })
-            } catch (audioError) {
-              // Audio opcional, no interrumpir si falla
-            }
-          }
-
-          if (success) break
         }
       } catch (apiError) {
         console.error(`Error con API ${api.name}:`, apiError.message)
@@ -396,101 +298,15 @@ async function fallbackDownload(conn, m, url, title) {
     }
 
     if (!success) {
-      // Último intento con YTDL directo
-      try {
-        await ytdlFallback(conn, m, url, title)
-        success = true
-      } catch (ytdlError) {
-        throw new Error('Todos los métodos de descarga fallaron')
-      }
+      throw new Error('Todos los métodos de descarga fallaron')
     }
 
-    if (success) {
-      await m.react('✅')
-    }
+    await m.react('✅')
 
   } catch (error) {
     await m.reply(`❌ *Error en descarga:* ${error.message}\n\n*Intenta con otro enlace o reporta el problema.*`)
     await m.react('❌')
   }
-}
-
-// Método de respaldo usando YTDL directo
-async function ytdlFallback(conn, m, url, title) {
-  try {
-    m.reply('🔧 *Intentando con extractor directo...*')
-
-    // Usar diferentes extractores según la plataforma
-    const platform = detectPlatform(url)
-    let extractorCommand = ''
-    
-    if (platform === 'youtube') {
-      // Para YouTube, usar yt-dlp con diferentes formatos
-      const formats = [
-        'best[height<=720]',
-        'worst[height>=360]',
-        'best[ext=mp4]',
-        'best'
-      ]
-      
-      for (const format of formats) {
-        try {
-          const response = await fetch(`https://yt-dlp-api.vercel.app/api/download?url=${encodeURIComponent(url)}&format=${format}`)
-          const data = await response.json()
-          
-          if (data.success && data.download_url) {
-            await conn.sendMessage(m.chat, {
-              video: { url: data.download_url },
-              caption: `🎥 *${title || data.title || 'Video'}*\n🔗 *Fuente:* ${url}\n📡 *Extractor:* YT-DLP`,
-              fileName: `${title || 'video'}.mp4`
-            }, { quoted: m })
-            return
-          }
-        } catch (e) {
-          continue
-        }
-      }
-    }
-
-    // Método manual usando bibliotecas públicas
-    const manualExtractors = [
-      `https://invidious.io/api/v1/videos/${getVideoId(url)}`,
-      `https://vid.puffyan.us/api/v1/videos/${getVideoId(url)}`,
-      `https://invidious.snopyta.org/api/v1/videos/${getVideoId(url)}`
-    ]
-
-    for (const extractor of manualExtractors) {
-      try {
-        const response = await fetch(extractor)
-        const data = await response.json()
-        
-        if (data.formatStreams && data.formatStreams.length > 0) {
-          const video = data.formatStreams.find(f => f.container === 'mp4') || data.formatStreams[0]
-          
-          await conn.sendMessage(m.chat, {
-            video: { url: video.url },
-            caption: `🎥 *${title || data.title || 'Video'}*\n🔗 *Fuente:* ${url}\n📡 *Extractor:* Invidious`,
-            fileName: `${title || 'video'}.mp4`
-          }, { quoted: m })
-          return
-        }
-      } catch (e) {
-        continue
-      }
-    }
-
-    throw new Error('Extractor directo falló')
-
-  } catch (error) {
-    throw error
-  }
-}
-
-// Extraer ID de video de YouTube
-function getVideoId(url) {
-  const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/
-  const match = url.match(regex)
-  return match ? match[1] : null
 }
 
 // Detectar plataforma del URL
@@ -516,10 +332,15 @@ function isValidUrl(string) {
   }
 }
 
+// Limpiar nombre de archivo
+function sanitizeFilename(filename) {
+  return filename.replace(/[^\w\s-]/g, '').replace(/\s+/g, '_').substring(0, 50)
+}
+
 // Configuración del handler
 handler.help = ['playdl', 'dl', 'download']
 handler.tags = ['downloader']
 handler.command = ['playdl', 'dl', 'download', 'descargar']
-handler.register = false
+handler.register = true
 
 export default handler
