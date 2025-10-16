@@ -78,8 +78,8 @@ let handler = async (m, { conn, usedPrefix, text, args, command }) => {
     }
 
     let list = [{
-        displayName: "💖💝 Y⃟o⃟ S⃟o⃟y⃟ Y⃟o⃟ 💝 💖 - Creador de Gawr Gura",
-        vcard: `BEGIN:VCARD\nVERSION:3.0\nFN: 💖💝 Y⃟o⃟ S⃟o⃟y⃟ Y⃟o⃟ 💝 💖  - Bot Developer\nitem1.TEL;waid=573133374132:573133374132\nitem1.X-ABLabel:Número\nitem2.ADR:;;Colombia;;;;\nitem2.X-ABLabel:País\nEND:VCARD`,
+        displayName: "💖💝 Y⃟o⃟ S⃟o⃟y⃟ Y⃟o⃟ 💝 💖 - Creador de isagi bot",
+        vcard: `BEGIN:VCARD\nVERSION:3.0\nFN: 💖💝 Y⃟o⃟ S⃟o⃟y⃟ Y⃟o⃟ 💝 💖  - Bot Developer\nitem1.TEL;waid=51941247696:51941247697\nitem1.X-ABLabel:Número\nitem2.ADR:;;Perú;;;;\nitem2.X-ABLabel:País\nEND:VCARD`,
     }];
 
     // Textos mejorados
@@ -88,11 +88,11 @@ let handler = async (m, { conn, usedPrefix, text, args, command }) => {
 ${deco.centro} *👑 Contacto Oficial del Creador 👑*
 ${deco.abajo}
 
-${deco.centro} *Nombre:* 💖💝 Y⃟o⃟ S⃟o⃟y⃟ Y⃟o⃟ 💝 💖
-${deco.centro} *País:* 🇨🇴 Colombia
-${deco.centro} *Rol:* Desarrollador de Gawr Gura Bot
+${deco.centro} *Nombre:* Gabriel 
+${deco.centro} *País:* 🇵🇪 Perú 
+${deco.centro} *Rol:* Desarrollador de isagi Yoichi 
 
-${deco.centro} “¡Hola! Soy el creador de *Gawr Gura Bot*, un proyecto lleno de azul y tiburones.
+${deco.centro} “¡Hola! Soy el creador de *isagi  Bot*, un proyecto lleno de azul y tiburones.
 ${deco.centro} Si tienes ideas, encontraste un bug o quieres apoyar este mar de alegría, mándame un mensaje.
 ${deco.centro} ¡Gracias por surfear estas aguas sharky conmigo! 🌊🦈
 
@@ -112,7 +112,7 @@ ${deco.centro} _¡Aru~! Shark power~_`;
             externalAdReply: {
                 showAdAttribution: true,
                 title: 'Gawr Gura - Bot ',
-                body: 'Creador: 💖💝 Y⃟o⃟ S⃟o⃟y⃟ Y⃟o⃟ 💝 💖 ',
+                body: 'Creador:gabriel ',
                 thumbnailUrl: deco.img,
                 sourceUrl: 'https://github.com',
                 mediaType: 1,
@@ -145,7 +145,8 @@ ${deco.centro} _¡Aru~! Shark power~_`;
                     externalAdReply: {
                         showAdAttribution: true,
                         title: 'Gawr Gura - Bot ',
-                        body: 'Creador: 💖💝 Y⃟o⃟ S⃟o⃟y⃟ Y⃟o⃟ 💝 💖 ',
+                        body:
+'Creador:gabriel ',
                         thumbnailUrl: decoNuevo.img,
                         sourceUrl: 'https://github.com',
                         mediaType: 1,
