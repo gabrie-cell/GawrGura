@@ -30,6 +30,7 @@ const tags = {
   search: '✦ Buscadores',
   sticker: '✦ Stickers',
   ia: '✦ Inteligencia Artificial',
+  nuevo: 'nuevos comandos',
 }
 
 const defaultMenu = {
