@@ -57,8 +57,8 @@ const handler = async (m, { conn, text, participants, isOwner, isAdmin }) => {
           contextInfo: {
             mentionedJid: users,
             externalAdReply: {
-              title: '🐚 GuraBot',
-              body: '¡Tu tiburoncita favorita~!',
+              title: '🐚 isagiBot',
+              body: '¡Tu futbolista favorito~!',
               thumbnail: fs.readFileSync('./media/gura-menu.jpg'), // Puedes reemplazar por una imagen de Gura
               sourceUrl: 'https://youtube.com/@GawrGura',
               mediaType: 1,
