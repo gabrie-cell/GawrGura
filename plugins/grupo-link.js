@@ -12,7 +12,7 @@ var handler = async (m, { conn, args }) => {
 
 ꒰ 🌟 *Únete y nada con nosotros en este hermoso grupo desu~!* 🌟 ꒱
 
-🌊 *- Gawr Gura 🦈*
+🌊 *- isagi Yoichi 🦈*
 `
   conn.reply(m.chat, message, m, { detectLink: true })
 }
