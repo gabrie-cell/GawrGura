@@ -8,7 +8,7 @@ let handler = async (m, { conn, text }) => {
       let stdout = execSync('git pull' + (m.fromMe && text ? ' ' + text : ''))
       await conn.reply(m.chat, `
 ╭━━〔 *🌊 Azu~ Azu~ Actualización Shark* 〕━━⬣
-┃ *𓆩 🦈 Gawr Gura dice:* Yaa~ hice magia con el código~ ✨
+┃ *𓆩 🦈 isagi dice:* Yaa~ hice magia con el código~ ✨
 ┃
 ┃ *📥 Resultado:* 
 ┃ ${stdout.toString().trim().split('\n').map(l => `┃ ${l}`).join('\n')}
