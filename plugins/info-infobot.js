@@ -56,11 +56,11 @@ const handler = async (m, { conn }) => {
 │  ├─ 🟢 Estado: Online                               │
 │  ├─ 🔋 Performance: ${memPercent < 80 ? 'Óptimo' : 'Alto uso'}             │
 │  ├─ 📡 Conexión: Estable                           │
-│  └─ 🦈 Versión: Gawr Gura Bot v2.0                 │
+│  └─ 🦈 Versión: isagi Yoichi Bot v2.0                 │
 │                                                    │
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
 
-꒰ 💙 *Información actualizada en tiempo real buba~* 💙 ꒱
+꒰ 💙 *Información actualizada en tiempo real we~* 💙 ꒱
 `
 
     await conn.sendMessage(m.chat, { text: infoMsg }, { quoted: m })
