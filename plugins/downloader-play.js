@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 
 let handler = async (m, { conn, usedPrefix, command, text }) => {
-  if (!text) return m.reply(`🦈 *¡Eh buba~! Ingresa algo para buscar en YouTube desu~*\n🌊 *Ejemplo:* ${usedPrefix + command} Gawr Gura`)
+  if (!text) return m.reply(`🦈 *¡Eh we~! Ingresa algo para buscar en YouTube desu~*\n🌊 *Ejemplo:* ${usedPrefix + command} isagi bot`)
 
   try {
     // 🔍 Buscar video con Delirius API
